@@ -195,6 +195,44 @@ function Testimonials() {
   );
 }
 
+// Call to Action
+function CallToAction() {
+  return (
+    <section className="py-24 bg-gradient-to-br from-primary via-primary to-secondary relative overflow-hidden">
+      {/* Pattern Overlay */}
+      <div className="absolute inset-0 opacity-10">
+        <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
+          <pattern id="dots" patternUnits="userSpaceOnUse" width="20" height="20">
+            <circle cx="2" cy="2" r="1.5" fill="white" />
+          </pattern>
+          <rect width="100" height="100" fill="url(#dots)" />
+        </svg>
+      </div>
+      
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
+        <h2 className="font-display text-4xl md:text-5xl font-bold text-white mb-6">
+          Ready to Taste Africa?
+        </h2>
+        <p className="text-xl text-white/80 mb-10 max-w-2xl mx-auto">
+          Join thousands of satisfied customers who trust Roshdah for authentic African ingredients delivered right to their door.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Link href="/products">
+            <Button size="lg" className="bg-white text-primary hover:bg-white/90 rounded-full text-lg px-10 py-6 shadow-xl">
+              Start Shopping
+            </Button>
+          </Link>
+          <Link href="/contact">
+            <Button variant="outline" size="lg" className="border-2 border-white text-white hover:bg-white/10 rounded-full text-lg px-10 py-6">
+              Get in Touch
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
   return (
     <div className="min-h-screen bg-background font-sans">
@@ -204,6 +242,7 @@ export default function Home() {
         <Features />
         <FeaturedProducts />
         <Testimonials />
+        <CallToAction />
       </main>
       <Footer />
     </div>
