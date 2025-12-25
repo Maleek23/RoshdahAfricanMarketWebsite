@@ -12,6 +12,7 @@ import ProductDetail from "@/pages/ProductDetail";
 import Services from "@/pages/Services";
 import About from "@/pages/About";
 import Contact from "@/pages/Contact";
+import BookCatering from "@/pages/BookCatering";
 
 function Router() {
   return (
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/products" component={ProductsPage} />
       <Route path="/product/:id" component={ProductDetail} />
       <Route path="/services" component={Services} />
+      <Route path="/book-catering" component={BookCatering} />
       <Route path="/about" component={About} />
       <Route path="/contact" component={Contact} />
       <Route component={NotFound} />

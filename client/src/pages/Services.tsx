@@ -48,7 +48,7 @@ export default function Services() {
                 <span>Bulk Orders for Resellers</span>
               </li>
             </ul>
-            <Link href="/contact">
+            <Link href="/book-catering">
               <Button size="lg" className="mt-4 bg-secondary hover:bg-secondary/90 text-white shadow-lg shadow-secondary/20">
                 Book Catering
               </Button>
