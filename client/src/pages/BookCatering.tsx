@@ -5,19 +5,8 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Navigation } from "@/components/Navigation";
+import { Marquee } from "@/components/Marquee";
 import { Footer } from "@/components/Footer";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Card } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Calendar, Users, Utensils, Clock, CheckCircle } from "lucide-react";
 
 const cateringFormSchema = z.object({
@@ -51,43 +40,28 @@ const menuItems = [
   { id: "moi-moi", name: "Moi Moi", desc: "Steamed bean pudding" },
 ];
 
-const eventTypes = [
-  "Wedding",
-  "Birthday Party",
-  "Corporate Event",
-  "Baby Shower",
-  "Graduation Party",
-  "Family Reunion",
-  "Religious Celebration",
-  "Funeral/Memorial",
-  "Other",
-];
+const eventTypes = ["Wedding", "Birthday Party", "Corporate Event", "Baby Shower", "Graduation Party", "Family Reunion", "Religious Celebration", "Funeral/Memorial", "Other"];
+const guestRanges = ["10-25 guests", "26-50 guests", "51-100 guests", "101-200 guests", "200+ guests"];
 
-const guestRanges = [
-  "10-25 guests",
-  "26-50 guests",
-  "51-100 guests",
-  "101-200 guests",
-  "200+ guests",
-];
+function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-2">
+      <label className="street-label !text-black">{label}</label>
+      {children}
+      {error && <p className="text-secondary text-xs font-bold">{error}</p>}
+    </div>
+  );
+}
 
 export default function BookCatering() {
   const { toast } = useToast();
-  
+
   const form = useForm<CateringFormData>({
     resolver: zodResolver(cateringFormSchema),
     defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
-      eventType: "",
-      eventDate: "",
-      eventTime: "",
-      guestCount: "",
-      venue: "",
-      selectedItems: [],
-      dietaryRequirements: "",
-      additionalNotes: "",
+      name: "", email: "", phone: "", eventType: "", eventDate: "",
+      eventTime: "", guestCount: "", venue: "", selectedItems: [],
+      dietaryRequirements: "", additionalNotes: "",
     },
   });
 
@@ -96,29 +70,15 @@ export default function BookCatering() {
       const messageContent = `
 CATERING BOOKING REQUEST
 ========================
-
-Contact Information:
-- Name: ${data.name}
-- Email: ${data.email}
-- Phone: ${data.phone}
-
-Event Details:
-- Event Type: ${data.eventType}
-- Date: ${data.eventDate}
-- Time: ${data.eventTime || "Not specified"}
-- Number of Guests: ${data.guestCount}
-- Venue: ${data.venue || "Not specified"}
-
-Menu Items Selected:
-${data.selectedItems.map(item => `- ${menuItems.find(m => m.id === item)?.name || item}`).join("\n")}
-
-Dietary Requirements:
-${data.dietaryRequirements || "None specified"}
-
-Additional Notes:
-${data.additionalNotes || "None"}
+Contact: ${data.name} | ${data.email} | ${data.phone}
+Event: ${data.eventType} on ${data.eventDate}${data.eventTime ? ` at ${data.eventTime}` : ""}
+Guests: ${data.guestCount}
+Venue: ${data.venue || "Not specified"}
+Menu:
+${data.selectedItems.map((item) => `- ${menuItems.find((m) => m.id === item)?.name || item}`).join("\n")}
+Dietary: ${data.dietaryRequirements || "None specified"}
+Notes: ${data.additionalNotes || "None"}
       `.trim();
-
       return apiRequest("POST", "/api/messages", {
         name: data.name,
         email: data.email,
@@ -127,265 +87,150 @@ ${data.additionalNotes || "None"}
       });
     },
     onSuccess: () => {
-      toast({
-        title: "Booking Request Sent!",
-        description: "We'll contact you within 24 hours with a quote.",
-      });
+      toast({ title: "Booking Request Sent!", description: "We'll contact you within 24 hours with a quote." });
       form.reset();
     },
     onError: (error) => {
-      toast({
-        title: "Error",
-        description: error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Error", description: error.message, variant: "destructive" });
     },
   });
 
-  const onSubmit = (data: CateringFormData) => {
-    submitCatering.mutate(data);
-  };
-
   const selectedItems = form.watch("selectedItems");
-
   const toggleItem = (itemId: string) => {
     const current = form.getValues("selectedItems");
-    if (current.includes(itemId)) {
-      form.setValue("selectedItems", current.filter(id => id !== itemId));
-    } else {
-      form.setValue("selectedItems", [...current, itemId]);
-    }
+    form.setValue("selectedItems", current.includes(itemId) ? current.filter((id) => id !== itemId) : [...current, itemId]);
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      
+      <Marquee />
+
       {/* Header */}
-      <div className="relative pt-32 pb-16 bg-secondary text-white overflow-hidden">
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-white rounded-full blur-3xl translate-x-1/2 -translate-y-1/2" />
-        </div>
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          <div className="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <Utensils className="w-8 h-8" />
-          </div>
-          <h1 className="font-display text-5xl font-bold mb-4">Book Catering</h1>
-          <p className="text-xl text-white/80 max-w-2xl mx-auto">
-            Let us make your event unforgettable with authentic African small chops and dishes.
+      <div className="bg-secondary border-b-2 border-black">
+        <div className="max-w-[1200px] mx-auto px-5 py-14 text-center">
+          <span className="kicker !bg-black !text-primary mb-5">★ Let's Party ★</span>
+          <h1 className="!text-black uppercase font-black text-[clamp(2.8rem,7vw,4.5rem)] leading-[0.95] mb-4">
+            Book Catering
+          </h1>
+          <p className="text-xl text-black/80 max-w-2xl mx-auto font-medium">
+            Tell us about your event. We'll bring the small chops — and the hype.
           </p>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-16 -mt-8">
-        <Card className="p-8 shadow-2xl border-0">
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-10">
-            
-            {/* Contact Information */}
+      <div className="max-w-5xl mx-auto px-5 py-14">
+        <div className="brutal bg-[#f4f1ea] text-black p-6 md:p-10" style={{ boxShadow: "8px 8px 0 #0e0e0c" }}>
+          <form onSubmit={form.handleSubmit((d) => submitCatering.mutate(d))} className="space-y-10">
+
             <div>
-              <h2 className="font-display text-2xl font-bold mb-6 flex items-center gap-2">
-                <Users className="w-6 h-6 text-secondary" />
-                Contact Information
+              <h2 className="!text-black font-display font-black uppercase text-2xl mb-6 flex items-center gap-2">
+                <Users className="w-6 h-6 text-secondary" /> Contact Information
               </h2>
               <div className="grid sm:grid-cols-3 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Full Name *</label>
-                  <Input 
-                    {...form.register("name")} 
-                    placeholder="Your name" 
-                    className="bg-muted/30"
-                    data-testid="input-name"
-                  />
-                  {form.formState.errors.name && (
-                    <p className="text-red-500 text-xs">{form.formState.errors.name.message}</p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Email *</label>
-                  <Input 
-                    {...form.register("email")} 
-                    placeholder="your@email.com" 
-                    className="bg-muted/30"
-                    data-testid="input-email"
-                  />
-                  {form.formState.errors.email && (
-                    <p className="text-red-500 text-xs">{form.formState.errors.email.message}</p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Phone Number *</label>
-                  <Input 
-                    {...form.register("phone")} 
-                    placeholder="+1 (555) 000-0000" 
-                    className="bg-muted/30"
-                    data-testid="input-phone"
-                  />
-                  {form.formState.errors.phone && (
-                    <p className="text-red-500 text-xs">{form.formState.errors.phone.message}</p>
-                  )}
-                </div>
+                <Field label="Full Name *" error={form.formState.errors.name?.message}>
+                  <input {...form.register("name")} placeholder="Your name" className="street-input" />
+                </Field>
+                <Field label="Email *" error={form.formState.errors.email?.message}>
+                  <input {...form.register("email")} placeholder="your@email.com" className="street-input" />
+                </Field>
+                <Field label="Phone *" error={form.formState.errors.phone?.message}>
+                  <input {...form.register("phone")} placeholder="+1 (555) 000-0000" className="street-input" />
+                </Field>
               </div>
             </div>
 
-            {/* Event Details */}
             <div>
-              <h2 className="font-display text-2xl font-bold mb-6 flex items-center gap-2">
-                <Calendar className="w-6 h-6 text-secondary" />
-                Event Details
+              <h2 className="!text-black font-display font-black uppercase text-2xl mb-6 flex items-center gap-2">
+                <Calendar className="w-6 h-6 text-secondary" /> Event Details
               </h2>
               <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Event Type *</label>
-                  <Select onValueChange={(val) => form.setValue("eventType", val)}>
-                    <SelectTrigger className="bg-muted/30" data-testid="select-event-type">
-                      <SelectValue placeholder="Select event" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {eventTypes.map((type) => (
-                        <SelectItem key={type} value={type}>{type}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {form.formState.errors.eventType && (
-                    <p className="text-red-500 text-xs">{form.formState.errors.eventType.message}</p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Event Date *</label>
-                  <Input 
-                    type="date" 
-                    {...form.register("eventDate")} 
-                    className="bg-muted/30"
-                    data-testid="input-date"
-                  />
-                  {form.formState.errors.eventDate && (
-                    <p className="text-red-500 text-xs">{form.formState.errors.eventDate.message}</p>
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Event Time</label>
-                  <Input 
-                    type="time" 
-                    {...form.register("eventTime")} 
-                    className="bg-muted/30"
-                    data-testid="input-time"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Number of Guests *</label>
-                  <Select onValueChange={(val) => form.setValue("guestCount", val)}>
-                    <SelectTrigger className="bg-muted/30" data-testid="select-guests">
-                      <SelectValue placeholder="Select range" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {guestRanges.map((range) => (
-                        <SelectItem key={range} value={range}>{range}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {form.formState.errors.guestCount && (
-                    <p className="text-red-500 text-xs">{form.formState.errors.guestCount.message}</p>
-                  )}
-                </div>
+                <Field label="Event Type *" error={form.formState.errors.eventType?.message}>
+                  <select {...form.register("eventType")} className="street-input" defaultValue="">
+                    <option value="" disabled>Select event</option>
+                    {eventTypes.map((t) => <option key={t} value={t}>{t}</option>)}
+                  </select>
+                </Field>
+                <Field label="Event Date *" error={form.formState.errors.eventDate?.message}>
+                  <input type="date" {...form.register("eventDate")} className="street-input" />
+                </Field>
+                <Field label="Event Time">
+                  <input type="time" {...form.register("eventTime")} className="street-input" />
+                </Field>
+                <Field label="Guests *" error={form.formState.errors.guestCount?.message}>
+                  <select {...form.register("guestCount")} className="street-input" defaultValue="">
+                    <option value="" disabled>Select range</option>
+                    {guestRanges.map((r) => <option key={r} value={r}>{r}</option>)}
+                  </select>
+                </Field>
               </div>
-              <div className="mt-6 space-y-2">
-                <label className="text-sm font-medium">Venue/Delivery Address</label>
-                <Input 
-                  {...form.register("venue")} 
-                  placeholder="Where should we deliver?" 
-                  className="bg-muted/30"
-                  data-testid="input-venue"
-                />
+              <div className="mt-6">
+                <Field label="Venue / Delivery Address">
+                  <input {...form.register("venue")} placeholder="Where should we deliver?" className="street-input" />
+                </Field>
               </div>
             </div>
 
-            {/* Menu Selection */}
             <div>
-              <h2 className="font-display text-2xl font-bold mb-2 flex items-center gap-2">
-                <Utensils className="w-6 h-6 text-secondary" />
-                Select Menu Items *
+              <h2 className="!text-black font-display font-black uppercase text-2xl mb-2 flex items-center gap-2">
+                <Utensils className="w-6 h-6 text-secondary" /> Select Menu Items *
               </h2>
-              <p className="text-muted-foreground mb-6">Choose the items you'd like for your event. We'll provide a quote based on your selections.</p>
-              
+              <p className="text-[#555] mb-6">Pick your lineup. We'll quote based on your selections.</p>
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {menuItems.map((item) => (
-                  <div
-                    key={item.id}
-                    onClick={() => toggleItem(item.id)}
-                    className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-200 ${
-                      selectedItems.includes(item.id)
-                        ? "border-secondary bg-secondary/5"
-                        : "border-border hover:border-secondary/50"
-                    }`}
-                    data-testid={`menu-item-${item.id}`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className={`w-5 h-5 rounded-md border-2 flex items-center justify-center mt-0.5 ${
-                        selectedItems.includes(item.id) 
-                          ? "bg-secondary border-secondary text-white" 
-                          : "border-muted-foreground"
-                      }`}>
-                        {selectedItems.includes(item.id) && <CheckCircle className="w-3 h-3" />}
-                      </div>
-                      <div>
-                        <h4 className="font-semibold">{item.name}</h4>
-                        <p className="text-sm text-muted-foreground">{item.desc}</p>
+                {menuItems.map((item) => {
+                  const active = selectedItems.includes(item.id);
+                  return (
+                    <div
+                      key={item.id}
+                      onClick={() => toggleItem(item.id)}
+                      className={`p-4 border-2 cursor-pointer transition-all ${active ? "border-black bg-primary/30 shadow-[3px_3px_0_#000]" : "border-black/20 hover:border-black bg-white"}`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`w-5 h-5 border-2 border-black flex items-center justify-center mt-0.5 shrink-0 ${active ? "bg-secondary text-white" : "bg-white"}`}>
+                          {active && <CheckCircle className="w-3.5 h-3.5" />}
+                        </div>
+                        <div>
+                          <h4 className="!text-black font-display font-extrabold uppercase">{item.name}</h4>
+                          <p className="text-sm text-[#555]">{item.desc}</p>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
               {form.formState.errors.selectedItems && (
-                <p className="text-red-500 text-sm mt-2">{form.formState.errors.selectedItems.message}</p>
+                <p className="text-secondary text-sm font-bold mt-2">{form.formState.errors.selectedItems.message}</p>
               )}
             </div>
 
-            {/* Additional Information */}
             <div>
-              <h2 className="font-display text-2xl font-bold mb-6 flex items-center gap-2">
-                <Clock className="w-6 h-6 text-secondary" />
-                Additional Information
+              <h2 className="!text-black font-display font-black uppercase text-2xl mb-6 flex items-center gap-2">
+                <Clock className="w-6 h-6 text-secondary" /> Additional Information
               </h2>
               <div className="space-y-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Dietary Requirements / Allergies</label>
-                  <Textarea 
-                    {...form.register("dietaryRequirements")} 
-                    placeholder="e.g., Nut-free, Halal, Vegetarian options needed..."
-                    className="bg-muted/30 min-h-[80px]"
-                    data-testid="input-dietary"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Additional Notes or Special Requests</label>
-                  <Textarea 
-                    {...form.register("additionalNotes")} 
-                    placeholder="Any other details we should know about your event..."
-                    className="bg-muted/30 min-h-[100px]"
-                    data-testid="input-notes"
-                  />
-                </div>
+                <Field label="Dietary Requirements / Allergies">
+                  <textarea {...form.register("dietaryRequirements")} placeholder="e.g., Nut-free, Halal, Vegetarian options..." className="street-input min-h-[80px]" />
+                </Field>
+                <Field label="Additional Notes">
+                  <textarea {...form.register("additionalNotes")} placeholder="Anything else we should know..." className="street-input min-h-[100px]" />
+                </Field>
               </div>
             </div>
 
-            {/* Submit */}
-            <div className="pt-6 border-t border-border">
-              <Button 
-                type="submit" 
-                size="lg" 
-                className="w-full sm:w-auto min-w-[250px] bg-secondary hover:bg-secondary/90"
+            <div className="pt-6 border-t-2 border-black">
+              <button
+                type="submit"
                 disabled={submitCatering.isPending}
-                data-testid="button-submit"
+                className="street-btn street-btn-orange w-full sm:w-auto min-w-[250px] disabled:opacity-60"
               >
-                {submitCatering.isPending ? "Sending Request..." : "Request Quote"}
-              </Button>
-              <p className="text-sm text-muted-foreground mt-4">
-                We'll review your request and contact you within 24 hours with a customized quote.
+                {submitCatering.isPending ? "Sending..." : "Request Quote"}
+              </button>
+              <p className="text-sm text-[#555] mt-4">
+                We'll review your request and hit you back within 24 hours with a quote.
               </p>
             </div>
           </form>
-        </Card>
+        </div>
       </div>
 
       <Footer />

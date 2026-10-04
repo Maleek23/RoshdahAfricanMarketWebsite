@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { Menu, X, ShoppingCart } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { useCart } from "@/hooks/use-cart";
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
   const [location] = useLocation();
+  const { count } = useCart();
 
   const links = [
-    { href: "/", label: "Home" },
     { href: "/products", label: "Shop" },
-    { href: "/services", label: "Services" },
+    { href: "/products", label: "Categories" },
+    { href: "/book-catering", label: "Catering" },
     { href: "/about", label: "About" },
     { href: "/contact", label: "Contact" },
   ];
@@ -18,79 +19,74 @@ export function Navigation() {
   const isActive = (path: string) => location === path;
 
   return (
-    <nav className="fixed w-full z-50 bg-background/95 backdrop-blur-md border-b border-border/50 shadow-sm">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
-          {/* Logo */}
-          <Link href="/" className="flex-shrink-0 flex items-center gap-2 group cursor-pointer">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center text-primary-foreground font-bold text-xl group-hover:scale-105 transition-transform duration-200">
-              R
-            </div>
-            <span className="font-display font-bold text-xl text-foreground group-hover:text-primary transition-colors">
-              Roshdah<span className="text-primary">.</span>
-            </span>
+    <header className="sticky top-0 z-50 bg-[#0e0e0c] border-b-2 border-primary">
+      <div className="max-w-[1200px] mx-auto px-5">
+        <div className="flex items-center justify-between h-[68px]">
+          <Link href="/" className="font-display font-black text-[1.6rem] uppercase tracking-tight text-primary leading-none">
+            Roshdah<span className="text-foreground">.</span>
           </Link>
 
-          {/* Desktop Menu */}
-          <div className="hidden md:flex space-x-8 items-center">
+          {/* Desktop links */}
+          <nav className="hidden md:flex items-center gap-7">
             {links.map((link) => (
               <Link
-                key={link.href}
+                key={link.label}
                 href={link.href}
-                className={`text-sm font-medium transition-colors hover:text-primary relative py-1 ${
-                  isActive(link.href) 
-                    ? "text-primary font-semibold after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-primary after:rounded-full" 
-                    : "text-muted-foreground"
+                className={`font-semibold text-[0.95rem] uppercase tracking-wide transition-colors hover:text-primary ${
+                  isActive(link.href) ? "text-primary" : "text-foreground"
                 }`}
               >
                 {link.label}
               </Link>
             ))}
-            <Button variant="default" size="sm" className="ml-4 rounded-full shadow-lg shadow-primary/20 hover:shadow-primary/40">
-              <ShoppingCart className="w-4 h-4 mr-2" />
-              Order Now
-            </Button>
-          </div>
+          </nav>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center">
+          <div className="flex items-center gap-3.5">
             <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="text-foreground hover:text-primary transition-colors p-2"
+              className="street-btn street-btn-lime street-btn-sm !border-black"
+              aria-label="Cart"
+              onClick={() =>
+                alert(
+                  count === 0
+                    ? "Your cart is empty — go grab some heat! 🌶️"
+                    : `You have ${count} item${count === 1 ? "" : "s"} in your cart. Checkout coming right up!`
+                )
+              }
             >
-              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              <ShoppingCart className="w-4 h-4" />
+              Cart
+              <span className="bg-secondary text-white border-2 border-black rounded-full w-[26px] h-[26px] inline-flex items-center justify-center text-[0.8rem] font-black">
+                {count}
+              </span>
+            </button>
+            <button
+              className="md:hidden flex flex-col gap-[5px] p-2"
+              onClick={() => setIsOpen(!isOpen)}
+              aria-label="Menu"
+            >
+              {isOpen ? <X className="w-6 h-6 text-primary" /> : <Menu className="w-6 h-6 text-primary" />}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu Overlay */}
+      {/* Mobile menu */}
       {isOpen && (
-        <div className="md:hidden absolute top-20 left-0 w-full bg-background border-b border-border shadow-xl animate-in slide-in-from-top-5 duration-200">
-          <div className="px-4 py-6 space-y-4">
-            {links.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setIsOpen(false)}
-                className={`block px-3 py-2 rounded-lg text-base font-medium ${
-                  isActive(link.href)
-                    ? "bg-primary/10 text-primary"
-                    : "text-foreground hover:bg-muted"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-            <div className="pt-4 border-t border-border">
-              <Button className="w-full justify-center">
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                Start Order
-              </Button>
-            </div>
-          </div>
-        </div>
+        <nav className="md:hidden border-t-2 border-primary bg-[#0e0e0c] px-5 py-5 flex flex-col gap-4">
+          {links.map((link) => (
+            <Link
+              key={link.label}
+              href={link.href}
+              onClick={() => setIsOpen(false)}
+              className={`font-display font-extrabold uppercase text-lg ${
+                isActive(link.href) ? "text-primary" : "text-foreground"
+              }`}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </nav>
       )}
-    </nav>
+    </header>
   );
 }

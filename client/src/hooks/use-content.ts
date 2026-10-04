@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api, type InsertMessage } from "@shared/routes";
+import { api } from "@shared/routes";
+import type { InsertMessage } from "@shared/schema";
 
 export function useTestimonials() {
   return useQuery({
